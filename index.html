@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="data:,">
+  <title>Lab Getaran &amp; Gelombang - Simulator Fisika Dasar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="physics.js" defer></script>
+  <script src="sim-canvas.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <a href="#mainWorkspace" class="skip-link">Lewati ke ruang simulasi</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="header-title-group">
+        <h1>Lab Getaran &amp; Gelombang</h1>
+        <p class="header-subtitle">Simulator Fisika Dasar: Bandul Matematis, Pegas, dan Percobaan Melde</p>
+      </div>
+
+      <div class="header-utilities">
+        <button type="button" id="openFormulaBtn" class="btn-secondary">Rumus</button>
+        <button type="button" id="themeToggleBtn" class="btn-secondary" aria-pressed="false">Tema: Terang</button>
+      </div>
+    </div>
+
+    <nav class="container module-nav" aria-label="Pilih modul simulasi">
+      <div class="module-tablist" role="tablist" aria-label="Modul eksperimen">
+        <button type="button" role="tab" id="tab-pendulum" class="module-tab is-active" data-module="pendulum" aria-selected="true" tabindex="0">
+          <span class="tab-idx">01</span> Bandul Matematis
+        </button>
+        <button type="button" role="tab" id="tab-spring" class="module-tab" data-module="spring" aria-selected="false" tabindex="-1">
+          <span class="tab-idx">02</span> Pegas (GHS)
+        </button>
+        <button type="button" role="tab" id="tab-melde" class="module-tab" data-module="melde" aria-selected="false" tabindex="-1">
+          <span class="tab-idx">03</span> Gelombang Melde
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <main id="mainWorkspace" class="container main-shell">
+    <section class="lab-workspace" aria-label="Ruang eksperimen aktif">
+      <div class="stage-column">
+        <div class="instrument-frame">
+          <div class="frame-head">
+            <h2 id="moduleHeading">01 Bandul Matematis</h2>
+            <span id="timeReadout" class="mono-readout">t = 0.00 s</span>
+          </div>
+
+          <div class="canvas-wrap canvas-wrap--apparatus">
+            <canvas id="apparatusCanvas" aria-label="Visualisasi alat percobaan fisika"></canvas>
+          </div>
+
+          <div class="playback-bar">
+            <div class="playback-primary">
+              <button type="button" id="playPauseBtn" class="btn-primary">Jeda</button>
+              <button type="button" id="resetBtn" class="btn-secondary">Reset</button>
+            </div>
+            <div class="speed-group" role="group" aria-label="Kecepatan simulasi">
+              <span class="speed-label">Laju:</span>
+              <button type="button" class="speed-btn" data-speed="0.5" aria-pressed="false">0.5x</button>
+              <button type="button" class="speed-btn is-active" data-speed="1" aria-pressed="true">1x</button>
+              <button type="button" class="speed-btn" data-speed="2" aria-pressed="false">2x</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="harmonicLockBar" class="harmonic-bar" hidden>
+          <span class="harmonic-title">Kunci Resonansi Harmonik:</span>
+          <div class="harmonic-buttons">
+            <button type="button" class="btn-secondary harmonic-btn" data-n="1">Nada Dasar n=1</button>
+            <button type="button" class="btn-secondary harmonic-btn" data-n="2">Harmonik n=2</button>
+            <button type="button" class="btn-secondary harmonic-btn" data-n="3">Harmonik n=3</button>
+            <button type="button" class="btn-secondary harmonic-btn" data-n="4">Harmonik n=4</button>
+          </div>
+        </div>
+
+        <div id="energySection" class="instrument-frame energy-panel">
+          <div class="frame-head">
+            <h3>Distribusi Energi Mekanik</h3>
+            <span id="energyTotalReadout" class="mono-readout">E_total = 0.000 J</span>
+          </div>
+          <div class="energy-bars">
+            <div class="energy-row">
+              <div class="energy-meta">
+                <span>Energi Kinetik (E_k)</span>
+                <span id="ekVal" class="mono-readout">0.000 J</span>
+              </div>
+              <div class="bar-track"><div id="ekBar" class="bar-fill bar-fill--ek"></div></div>
+            </div>
+            <div class="energy-row">
+              <div class="energy-meta">
+                <span>Energi Potensial (E_p)</span>
+                <span id="epVal" class="mono-readout">0.000 J</span>
+              </div>
+              <div class="bar-track"><div id="epBar" class="bar-fill bar-fill--ep"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="instrument-frame">
+          <div class="frame-head">
+            <h3 id="graphTitle">Bagaimana simpangan sudut terhadap waktu?</h3>
+          </div>
+          <div class="canvas-wrap canvas-wrap--graph">
+            <canvas id="graphCanvas" aria-label="Grafik hasil pengukuran simulasi"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <aside class="control-column" aria-label="Kontrol parameter dan validasi">
+        <div class="instrument-frame control-card">
+          <h3>Kasus Uji Cepat (Preset)</h3>
+          <div id="presetList" class="preset-grid"></div>
+        </div>
+
+        <div class="instrument-frame control-card">
+          <div class="frame-head">
+            <h3>Parameter Eksperimen</h3>
+          </div>
+
+          <div id="paramErrorBanner" class="error-alert" role="alert" hidden>
+            <p id="paramErrorText"></p>
+            <button type="button" id="restoreParamBtn" class="btn-secondary btn-compact">Pulihkan Nilai</button>
+          </div>
+
+          <div id="paramControls" class="param-list"></div>
+
+          <div id="gravityShortcuts" class="shortcut-row">
+            <span class="shortcut-label">Preset Gravitasi:</span>
+            <button type="button" class="btn-secondary btn-compact gravity-btn" data-g="9.81">Bumi (9.81)</button>
+            <button type="button" class="btn-secondary btn-compact gravity-btn" data-g="1.62">Bulan (1.62)</button>
+            <button type="button" class="btn-secondary btn-compact gravity-btn" data-g="3.71">Mars (3.71)</button>
+          </div>
+        </div>
+
+        <div class="instrument-frame validation-card">
+          <div class="frame-head">
+            <h3>Validasi Teori vs Simulasi</h3>
+          </div>
+
+          <div id="measuringBanner" class="state-banner state-banner--measuring" hidden>
+            <span id="measuringText">Mengukur 1 siklus penuh...</span>
+            <button type="button" id="quickMeasureBtn" class="btn-secondary btn-compact">Ukur Cepat</button>
+          </div>
+
+          <dl class="metric-compare">
+            <div class="metric-row">
+              <dt id="theoryMainLabel">Teori (T)</dt>
+              <dd id="theoryMainVal" class="mono-readout">-</dd>
+            </div>
+            <div class="metric-row">
+              <dt id="simMainLabel">Simulasi (T)</dt>
+              <dd id="simMainVal" class="mono-readout">-</dd>
+            </div>
+            <div class="metric-row">
+              <dt>Selisih / Galat</dt>
+              <dd id="errorPctVal" class="mono-readout">-</dd>
+            </div>
+            <div class="metric-row">
+              <dt id="subMetricLabel">Frekuensi f (Teori / Sim)</dt>
+              <dd id="subMetricVal" class="mono-readout">-</dd>
+            </div>
+          </dl>
+
+          <p id="physicsInsight" class="insight-note"></p>
+
+          <button type="button" id="recordTrialBtn" class="btn-accent btn-full">
+            Catat ke Tabel Pengujian
+          </button>
+          <p id="recordFeedback" class="record-feedback" aria-live="polite"></p>
+        </div>
+      </aside>
+    </section>
+
+    <section class="instrument-frame log-section" aria-label="Log pengujian validasi">
+      <div class="log-header">
+        <div>
+          <h2>Tabel Pengujian Validasi (Teori vs Simulasi)</h2>
+          <p class="log-subtitle">Rekam berbagai kombinasi parameter untuk bahan analisis laporan KKNI.</p>
+        </div>
+        <div class="log-actions">
+          <button type="button" id="exportCsvBtn" class="btn-secondary">Unduh CSV</button>
+          <button type="button" id="printTableBtn" class="btn-secondary">Cetak Tabel</button>
+          <button type="button" id="clearLogBtn" class="btn-secondary">Hapus Semua</button>
+        </div>
+      </div>
+
+      <div class="filter-bar" role="group" aria-label="Filter modul tabel">
+        <button type="button" class="filter-btn is-active" data-filter="all" aria-pressed="true">Semua</button>
+        <button type="button" class="filter-btn" data-filter="pendulum" aria-pressed="false">Bandul</button>
+        <button type="button" class="filter-btn" data-filter="spring" aria-pressed="false">Pegas</button>
+        <button type="button" class="filter-btn" data-filter="melde" aria-pressed="false">Melde</button>
+      </div>
+
+      <div id="logEmptyState" class="empty-state">
+        <p><strong>Belum ada data pengujian yang dicatat.</strong></p>
+        <p>Jalankan simulasi (atau tekan "Ukur Cepat" jika sedang mengukur siklus), lalu klik "Catat ke Tabel Pengujian" untuk menyimpan baris data di sini.</p>
+      </div>
+
+      <div id="logTableWrap" class="table-scroll" hidden>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>No</th>
+              <th>Modul</th>
+              <th>Ringkasan Parameter</th>
+              <th>Nilai Teori</th>
+              <th>Nilai Simulasi</th>
+              <th>Galat (%)</th>
+              <th>Catatan Fisis</th>
+            </tr>
+          </thead>
+          <tbody id="logTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>[Nama Kelompok / Kelas - Program Studi Ilmu Komputer, FMIPA UNIMED]</p>
+    </div>
+  </footer>
+
+  <dialog id="formulaModal" class="formula-dialog" aria-labelledby="formulaModalTitle">
+    <div class="dialog-inner">
+      <div class="dialog-head">
+        <h2 id="formulaModalTitle">Rumus Inti Getaran &amp; Gelombang</h2>
+        <button type="button" id="closeFormulaBtn" class="btn-secondary btn-compact">Tutup</button>
+      </div>
+
+      <div class="dialog-body">
+        <article class="formula-block">
+          <h3>01 Bandul Matematis (Sudut Kecil)</h3>
+          <p class="formula-math">T = 2&pi; &radic;(L / g), &nbsp; f = 1 / T</p>
+          <p>Periode tidak bergantung pada massa beban m, melainkan hanya pada panjang tali L dan percepatan gravitasi g. Integrasi numerik RK4 di web ini menyelesaikan persamaan tepat d<sup>2</sup>&theta;/dt<sup>2</sup> = -(g/L) sin(&theta;).</p>
+        </article>
+
+        <article class="formula-block">
+          <h3>02 Sistem Pegas-Massa (GHS)</h3>
+          <p class="formula-math">T = 2&pi; &radic;(m / k), &nbsp; E<sub>m</sub> = 1/2 k A<sup>2</sup></p>
+          <p>Pada kondisi tanpa redaman (b = 0), periode bergantung pada massa m dan konstanta kekakuan pegas k, bukan amplitudo awal A.</p>
+        </article>
+
+        <article class="formula-block">
+          <h3>03 Gelombang Stasioner pada Tali (Percobaan Melde)</h3>
+          <p class="formula-math">F = m<sub>b</sub> g, &nbsp; v = &radic;(F / &mu;), &nbsp; &lambda; = v / f, &nbsp; f<sub>n</sub> = (n v) / (2 L)</p>
+          <p>Resonansi terjadi saat panjang tali L memuat kelipatan bulat setengah panjang gelombang (L = n &lambda; / 2), membentuk n perut dan n + 1 simpul.</p>
+        </article>
+      </div>
+    </div>
+  </dialog>
+</body>
+</html>
